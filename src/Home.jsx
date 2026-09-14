@@ -5,13 +5,14 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useContext, useEffect } from "react";
-import { UserContext } from "./context/UserContext";
+import { UserContext } from "./context/context";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Home() {
   const navigate = useNavigate();
-  const { isLoggedIn, isInitializing } = useContext(UserContext);
+  const { user, isLoggedIn, isInitializing } = useContext(UserContext);
+  const isAdmin = user?._id == "-1" || user?.id == "-1";
 
   useEffect(() => {
     if (!isLoggedIn && !isInitializing) {
@@ -31,6 +32,11 @@ export default function Home() {
           <Button color="inherit" onClick={() => navigate("/item")}>
             Item
           </Button>
+          {isAdmin && (
+            <Button color="inherit" onClick={() => navigate("/user")}>
+              User
+            </Button>
+          )}
           <Button
             color="inherit"
             onClick={async () => {

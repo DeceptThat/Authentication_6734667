@@ -1,8 +1,7 @@
-import { createContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { UserContext } from "./context";
 
 const API_URL = import.meta.env.VITE_API_URL;
-
-export const UserContext = createContext();
 
 export function UserProvider({ children }) {
   const isInit = useRef(false);
@@ -11,12 +10,6 @@ export function UserProvider({ children }) {
   const [loginErrorMsg, setLoginErrorMsg] = useState("");
   const [isLogInError, setIsLoginError] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
-
-  useEffect(() => {
-    if (isInit.current) return;
-    isInit.current = true;
-    me();
-  }, []);
 
   const me = async () => {
     try {
@@ -39,6 +32,12 @@ export function UserProvider({ children }) {
     }
   };
 
+  useEffect(() => {
+    if (isInit.current) return;
+    isInit.current = true;
+    me();
+  }, []);
+
   const login = async (email, password) => {
     const body = {
       email: email,
@@ -51,9 +50,7 @@ export function UserProvider({ children }) {
       body: JSON.stringify(body),
     });
     if (result.ok) {
-      const data = await result.json();
-      setUser(data.user);
-      setIsLoggedIn(true);
+      await me();
       return true;
     } else {
       const errData = await result.json();

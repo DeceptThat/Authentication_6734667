@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import Typography from "@mui/material/Typography";
-import Card from "@mui/material/Card";
 import { DataGrid } from "@mui/x-data-grid";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -51,12 +50,6 @@ export default function Item() {
     },
   ];
 
-  useEffect(() => {
-    if (isInit.current) return;
-    isInit.current = true;
-    loadItems();
-  }, []);
-
   const loadItems = async () => {
     const fetchResult = await fetch(`${API_URL}/api/item`, {
       method: "GET",
@@ -66,6 +59,12 @@ export default function Item() {
       setItems(data.itemList);
     }
   };
+
+  useEffect(() => {
+    if (isInit.current) return;
+    isInit.current = true;
+    loadItems();
+  }, []);
 
   const onCategoryChange = (event) => {
     setNewItemCategory(event.target.value);
