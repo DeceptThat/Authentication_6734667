@@ -18,6 +18,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Item() {
   const [items, setItems] = useState([]);
+  const [auditLogs, setAuditLogs] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [newItemCategroy, setNewItemCategory] = useState("");
   const newItemName = useRef(null);
@@ -60,10 +61,21 @@ export default function Item() {
     }
   };
 
+  const loadAuditLogs = async () => {
+    const fetchResult = await fetch(`${API_URL}/api/item/audit`, {
+      credentials: "include",
+    });
+    if (fetchResult.ok) {
+      const data = await fetchResult.json();
+      setAuditLogs(data.logs || []);
+    }
+  };
+
   useEffect(() => {
     if (isInit.current) return;
     isInit.current = true;
     loadItems();
+    loadAuditLogs();
   }, []);
 
   const onCategoryChange = (event) => {
@@ -98,6 +110,7 @@ export default function Item() {
     });
     if (addItemResult.ok) {
       await loadItems();
+      await loadAuditLogs();
     }
     closeDialog();
   };
@@ -108,6 +121,7 @@ export default function Item() {
     });
     if (deleteResult.ok) {
       await loadItems();
+      await loadAuditLogs();
     }
   };
 
@@ -125,6 +139,32 @@ export default function Item() {
         </Button>
       </div>
       <DataGrid rows={items} columns={cols} getRowId={(row) => row._id} />
+      <Typography variant="h6" sx={{ mt: 4, mb: 1 }}>
+        Item audit log
+      </Typography>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-left">
+          <thead>
+            <tr className="border-b">
+              <th className="p-2">Time</th>
+              <th className="p-2">Action</th>
+              <th className="p-2">User</th>
+              <th className="p-2">Item ID</th>
+            </tr>
+          </thead>
+          <tbody>
+            {auditLogs.map((log) => (
+              <tr className="border-b" key={log._id}>
+                <td className="p-2">{new Date(log.createdAt).toLocaleString()}</td>
+                <td className="p-2">{log.action}</td>
+                <td className="p-2">{log.username || log.email || log.userId}</td>
+                <td className="p-2">{log.itemId || "-"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {!auditLogs.length && <Typography sx={{ mt: 1 }}>No audit events yet.</Typography>}
+      </div>
       <Dialog open={openDialog} onClose={closeDialog} fullWidth>
         <DialogContent>
           <DialogContentText sx={{ mb: 1 }}>
